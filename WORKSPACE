@@ -11,6 +11,12 @@ maven_server(
   url = "http://central.maven.org/maven2/",
 )
 
+new_local_repository(
+  name = "jffinative",
+  path = "/users/rohitsd/jnr-unixsocket/target/dependency/jffi-1.2.15-native.jar",
+  build_file = "third_party/uds/BUILD"
+)
+
 maven_jar(
   name = "org_apache_avro_avro",
   artifact = "org.apache.avro:avro:1.7.4"
@@ -360,4 +366,39 @@ maven_jar(
 maven_jar(
   name = "com_github_jnr_jnr_unixsocket",
   artifact = "com.github.jnr:jnr-unixsocket:0.18"
+)
+
+maven_jar(
+  name = "com_github_jnr_jffi",
+  artifact = "com.github.jnr:jffi:1.2.15"
+)
+
+maven_jar(
+  name = "org_ow2_asm_asm_tree",
+  artifact = "org.ow2.asm:asm-tree:5.0.3"
+)
+
+maven_jar(
+  name = "org_ow2_asm_asm",
+  artifact = "org.ow2.asm:asm:5.0.3"
+)
+
+maven_jar(
+  name = "com_github_jnr_jnr_x86asm",
+  artifact = "com.github.jnr:jnr-x86asm:1.0.2"
+)
+
+maven_jar(
+  name = "org_ow2_asm_asm_util",
+  artifact = "org.ow2.asm:asm-util:5.0.3"
+)
+
+maven_jar(
+  name = "org_ow2_asm_asm_commons",
+  artifact = "org.ow2.asm:asm-commons:5.0.3"
+)
+
+maven_jar(
+  name = "org_ow2_asm_asm_analysis",
+  artifact = "org.ow2.asm:asm-analysis:5.0.3"
 )

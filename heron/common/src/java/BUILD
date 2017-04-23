@@ -10,6 +10,7 @@ common_deps_files = \
         "@org_yaml_snakeyaml//jar",
         "@com_google_guava_guava//jar",
         "//third_party/java:unixdomainsocket",
+        "//third_party/uds:jffi-native",
     ]
 
 java_library(
@@ -42,5 +43,6 @@ java_library(
         ":basics-java",
         "@com_google_protobuf_protobuf_java//jar",
         "//third_party/java:unixdomainsocket",
+        "//third_party/uds:jffi-native",
     ],
 )

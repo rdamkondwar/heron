@@ -53,7 +53,7 @@ import jnr.unixsocket.UnixSocketChannel;
  * To implement this, we will add the check whether write is needed into persistent tasks.
  */
 public abstract class HeronClient2 implements ISelectHandler {
-  private static final Logger LOG = Logger.getLogger(HeronClient.class.getName());
+  private static final Logger LOG = Logger.getLogger(HeronClient2.class.getName());
 
   // When we send a request, we need to:
   // record the the context for this particular RID, and prepare the response for that RID
@@ -115,6 +115,7 @@ public abstract class HeronClient2 implements ISelectHandler {
    * @param
    */
   public HeronClient2(NIOLooper s, String host, HeronSocketOptions options, boolean cus) {
+    LOG.info("rohitsd_log: Called uds contructor!");
     nioLooper = s;
     // endpoint = new InetSocketAddress(host, port);
     socketOptions = options;
@@ -125,8 +126,6 @@ public abstract class HeronClient2 implements ISelectHandler {
     messageMap = new HashMap<String, Message.Builder>();
 
     createUdsSocket = true;
-    java.io.File path = new java.io.File("/tmp/rohitsd/1.sock");
-    udsEndPoint =  new UnixSocketAddress(path);
   }
 
   // Register the protobuf Message's name with protobuf Message
@@ -149,18 +148,22 @@ public abstract class HeronClient2 implements ISelectHandler {
                 socketOptions.getSocketReceivedBufferSizeInBytes());
         socketChannel.socket().setTcpNoDelay(true);
       } else {
+        LOG.info("rohitsd_log: Opening UnixSocketChannel...");
+        java.io.File path = new java.io.File("/tmp/rohitsd/1.sock");
+        udsEndPoint = new UnixSocketAddress(path);
         socketChannel = UnixSocketChannel.open(udsEndPoint);
+        LOG.info("rohitsd_log: Opened UnixSocketChannel...");
       }
 
       // If the socketChannel has already connect to endpoint, call handleConnect()
       // Otherwise, registerConnect(), which will call handleConnect() when it is connectible
-      LOG.info("Connecting to endpoint: " + endpoint);
-      if (socketChannel.connect(endpoint)) {
-        handleConnect(socketChannel);
-      } else {
-        nioLooper.registerConnect(socketChannel, this);
-      }
-
+      // LOG.info("Connecting to endpoint: " + udsEndPoint);
+      // if (socketChannel.connect(udsEndPoint)) {
+      //   handleConnect(socketChannel);
+      // } else {
+      //   nioLooper.registerConnect(socketChannel, this);
+      // }
+      handleConnect(socketChannel);
       // Selector sel = NativeSelectorProvider.getInstance().openSelector();
       // UnixServerSocketChannel udsSocketChannel = UnixServerSocketChannel.open();
       // udsSocketChannel.configureBlocking(false);

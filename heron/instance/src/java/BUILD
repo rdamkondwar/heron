@@ -11,11 +11,8 @@ instance_deps_files =  \
         "//heron/api/src/java:classification",
         "//heron/common/src/java:common-java",
         "//third_party/java:logging", 
-        "@com_github_jnr_jnr_ffi//jar",
-	"@com_github_jnr_jnr_constants//jar",
-	"@com_github_jnr_jnr_enxio//jar",
-	"@com_github_jnr_jnr_posix//jar",
-	"@com_github_jnr_jnr_unixsocket//jar",
+        "//third_party/java:unixdomainsocket",
+        "//third_party/uds:jffi-native",
     ]
 
 java_library(

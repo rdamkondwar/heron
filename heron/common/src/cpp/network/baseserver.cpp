@@ -117,19 +117,24 @@ sp_int32 BaseServer::Start_Base() {
     strncpy(unix_addr.sun_path, socket_name_, sizeof(unix_addr.sun_path) - 1);
     server_fd_ = socket(PF_UNIX, SOCK_STREAM, 0);
     if (!server_fd_) {
-      perror("socket");
-      exit(-1);
+      LOG(ERROR) << "Failed to create server uds socket.";
     }
 
     if (bind(server_fd_, (const struct sockaddr *)&unix_addr, sizeof(unix_addr)) < 0) {
-      perror("socket");
-      exit(-1);
+      LOG(ERROR) << "Failed to bind server uds socket.";
+    }
+
+    // Listen for new connections
+    if (listen(server_fd_, 100) < 0) {
+      LOG(ERROR) << "listen of a socket failed in server " << errno << "\n";
+      close(server_fd_);
+      return -1;
     }
 
     if (eventLoop_->registerForRead(server_fd_, on_new_connection_callback_2, true) < 0) {
       LOG(ERROR) << "register for read of the socket failed in server\n";
       close(server_fd_);
-      return -1;
+      // return -1;
     }
 }
 
@@ -214,7 +219,7 @@ void BaseServer::OnNewConnection2(EventLoop::Status _status) {
   if (_status == EventLoop::READ_EVENT) {
     // The EventLoop indicated that the socket is writable.
     // Which means that a new client has connected to it.
-    auto endPoint = new ConnectionEndPoint(options_.get_sin_family() != AF_INET);
+    auto endPoint = new ConnectionEndPoint(true);
     struct sockaddr* serv_addr = endPoint->addr();
     socklen_t addrlen = endPoint->addrlen();
     sp_int32 fd = accept(server_fd_, serv_addr, &addrlen);

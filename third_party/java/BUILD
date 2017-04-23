@@ -189,16 +189,30 @@ java_library(
     srcs = [ "Empty.java" ],
     exports = [
 	"@com_github_jnr_jnr_ffi//jar",
-        "@com_github_jnr_jnr_constants//jar",
+  "@com_github_jnr_jnr_constants//jar",
 	"@com_github_jnr_jnr_enxio//jar",
 	"@com_github_jnr_jnr_posix//jar",
 	"@com_github_jnr_jnr_unixsocket//jar",
+  "@com_github_jnr_jffi//jar",
+  "@com_github_jnr_jnr_x86asm//jar",
+  "@org_ow2_asm_asm_all//jar",
     ],
     deps = [
 	"@com_github_jnr_jnr_ffi//jar",
-        "@com_github_jnr_jnr_constants//jar",
+  "@com_github_jnr_jnr_constants//jar",
 	"@com_github_jnr_jnr_enxio//jar",
 	"@com_github_jnr_jnr_posix//jar",
 	"@com_github_jnr_jnr_unixsocket//jar",
+  "@com_github_jnr_jffi//jar",
+  "@com_github_jnr_jnr_x86asm//jar",
+  "@org_ow2_asm_asm_all//jar",
     ],
 )
+
+#"@org_ow2_asm_asm//jar,"
+# "@org_ow2_asm_asm_tree//jar",
+
+#  "@org_ow2_asm_asm_util//jar",
+#  "@org_ow2_asm_asm_commons//jar",
+#  "@org_ow2_asm_asm_analysis//jar",
+#  "@jffinative//:jffi-native",
