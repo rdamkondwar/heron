@@ -202,8 +202,9 @@ void StMgr::StartStmgrServer() {
   LOG(INFO) << "Creating StmgrServer" << std::endl;
   NetworkOptions sops;
   sops.set_host(IpUtils::getHostName());
+  // std::string sockt_path("/tmp/rohitsd/1.sock");
   sops.set_port(stmgr_port_);
-  sops.set_socket_family(PF_INET);
+  sops.set_socket_family(AF_INET);
   sops.set_max_packet_size(std::numeric_limits<sp_uint32>::max() - 1);
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);

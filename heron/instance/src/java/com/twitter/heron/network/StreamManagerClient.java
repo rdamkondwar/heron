@@ -25,7 +25,7 @@ import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.network.HeronClient;
+import com.twitter.heron.common.network.HeronClient2;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
@@ -46,7 +46,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
  * which will new a corresponding instance.
  */
 
-public class StreamManagerClient extends HeronClient {
+public class StreamManagerClient extends HeronClient2 {
   private static final Logger LOG = Logger.getLogger(StreamManagerClient.class.getName());
 
   private final String topologyName;
@@ -77,7 +77,7 @@ public class StreamManagerClient extends HeronClient {
                              Communicator<InstanceControlMsg> inControlQueue,
                              HeronSocketOptions options,
                              GatewayMetrics gatewayMetrics) {
-    super(s, streamManagerHost, streamManagerPort, options);
+    super(s, streamManagerHost, options, true);
 
     this.topologyName = topologyName;
     this.topologyId = topologyId;
@@ -169,6 +169,7 @@ public class StreamManagerClient extends HeronClient {
       //TODO:- is this a good thing?
       throw new RuntimeException("Response from Stream Manager not ok");
     }
+    //Need to add here...
     if (response instanceof StreamManager.RegisterInstanceResponse) {
       handleRegisterResponse((StreamManager.RegisterInstanceResponse) response);
     } else {

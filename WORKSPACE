@@ -336,3 +336,28 @@ maven_jar(
   name = "com_101tec_zkclient",
   artifact = "com.101tec:zkclient:0.3"
 )
+
+maven_jar(
+  name = "com_github_jnr_jnr_ffi",
+  artifact = "com.github.jnr:jnr-ffi:2.1.4",
+)
+
+maven_jar(
+  name = "com_github_jnr_jnr_constants",
+  artifact = "com.github.jnr:jnr-constants:0.9.8"
+)
+
+maven_jar(
+  name = "com_github_jnr_jnr_enxio",
+  artifact = "com.github.jnr:jnr-enxio:0.16"
+)
+
+maven_jar(
+  name = "com_github_jnr_jnr_posix",
+  artifact = "com.github.jnr:jnr-posix:3.0.35"
+)
+
+maven_jar(
+  name = "com_github_jnr_jnr_unixsocket",
+  artifact = "com.github.jnr:jnr-unixsocket:0.18"
+)

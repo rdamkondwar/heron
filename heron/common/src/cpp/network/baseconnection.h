@@ -125,6 +125,9 @@ class BaseConnection {
 
   sp_int32 getPort();
 
+  ConnectionOptions* mOptions;
+  EventLoop* mEventLoop;
+
  protected:
   /**
    * Writes data out on this connection
@@ -180,7 +183,7 @@ class BaseConnection {
   sp_int32 registerEndpointForRead();
 
   // Connection otions.
-  ConnectionOptions* mOptions;
+
 
  private:
   // Internal callback that is invoked when a read event happens on a
@@ -215,7 +218,7 @@ class BaseConnection {
   ConnectionEndPoint* mEndpoint;
 
   // The underlying event loop
-  EventLoop* mEventLoop;
+
   bool mCanCloseConnection;
 };
 

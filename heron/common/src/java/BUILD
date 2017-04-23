@@ -9,6 +9,7 @@ common_deps_files = \
         "//heron/api/src/java:api-java",
         "@org_yaml_snakeyaml//jar",
         "@com_google_guava_guava//jar",
+        "//third_party/java:unixdomainsocket",
     ]
 
 java_library(
@@ -40,5 +41,6 @@ java_library(
     deps = [
         ":basics-java",
         "@com_google_protobuf_protobuf_java//jar",
+        "//third_party/java:unixdomainsocket",
     ],
 )

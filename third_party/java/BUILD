@@ -183,3 +183,22 @@ java_library(
     exports = [ "@org_mockito_mockito_all//jar" ],
     deps = [ "@org_mockito_mockito_all//jar" ],
 )
+
+java_library(
+    name = "unixdomainsocket",
+    srcs = [ "Empty.java" ],
+    exports = [
+	"@com_github_jnr_jnr_ffi//jar",
+        "@com_github_jnr_jnr_constants//jar",
+	"@com_github_jnr_jnr_enxio//jar",
+	"@com_github_jnr_jnr_posix//jar",
+	"@com_github_jnr_jnr_unixsocket//jar",
+    ],
+    deps = [
+	"@com_github_jnr_jnr_ffi//jar",
+        "@com_github_jnr_jnr_constants//jar",
+	"@com_github_jnr_jnr_enxio//jar",
+	"@com_github_jnr_jnr_posix//jar",
+	"@com_github_jnr_jnr_unixsocket//jar",
+    ],
+)

@@ -142,6 +142,10 @@ class StMgrServer : public Server {
   typedef std::unordered_map<sp_int32, InstanceData*> TaskIdInstanceDataMap;
   TaskIdInstanceDataMap instance_info_;
 
+  // rohitsd
+  typedef std::unordered_map<sp_int32, InstanceData*> TaskIdInstanceDataUDSMap;
+  TaskIdInstanceDataMap instance_uds_info_;
+
   // map of Instance_id/stmgrid to metric
   // Used for back pressure metrics
   typedef std::unordered_map<sp_string, heron::common::TimeSpentMetric*> InstanceMetricMap;

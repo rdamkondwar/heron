@@ -92,6 +92,10 @@ class BaseServer {
   // friend functions
   friend void CallHandleConnectionCloseAndDelete(BaseServer*, BaseConnection*, NetworkErrorCode);
 
+  EventLoop* eventLoop_;
+  NetworkOptions options_;
+  bool needUnixDomainSocket = false;
+
  protected:
   // Instantiate a new Connection
   virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
@@ -105,7 +109,7 @@ class BaseServer {
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status) = 0;
 
   // The underlying EventLoop
-  EventLoop* eventLoop_;
+  // EventLoop* eventLoop_;
 
   // The set of active connections
   std::unordered_set<BaseConnection*> active_connections_;
@@ -116,6 +120,7 @@ class BaseServer {
 
   // Internal method to be called when a write event happens on listen_fd_
   void OnNewConnection(EventLoop::Status status);
+  void OnNewConnection2(EventLoop::Status status);
 
   // When a Connection closes, this is invoked by the Connection
   void OnConnectionClose(BaseConnection* connection, NetworkErrorCode status);
@@ -130,16 +135,17 @@ class BaseServer {
 
   // The socket that we are listening on
   sp_int32 listen_fd_;
+  sp_int32 server_fd_;
 
   // When we create a Connection structure, we use the following options
   ConnectionOptions connection_options_;
 
   // The options of this server.
-  NetworkOptions options_;
 
   // Placeholders for various callbacks that we pass to the Connection.
   // They are kept here so that they can be cleaned up in the end
   VCallback<EventLoop::Status> on_new_connection_callback_;
+  VCallback<EventLoop::Status> on_new_connection_callback_2;
 };
 
 #endif  // BASESERVER_H_

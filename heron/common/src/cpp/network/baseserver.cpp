@@ -36,10 +36,13 @@ void BaseServer::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
   eventLoop_ = eventLoop;
   options_ = _options;
   listen_fd_ = -1;
+  server_fd_ = -1;
   connection_options_.max_packet_size_ = options_.get_max_packet_size();
   connection_options_.high_watermark_ = options_.get_high_watermark();
   connection_options_.low_watermark_ = options_.get_low_watermark();
   on_new_connection_callback_ = [this](EventLoop::Status status) { this->OnNewConnection(status); };
+  on_new_connection_callback_2 = [this](EventLoop::Status status) { this->OnNewConnection2(status);
+  };
 }
 
 BaseServer::~BaseServer() {}
@@ -105,6 +108,30 @@ sp_int32 BaseServer::Start_Base() {
     close(listen_fd_);
     return -1;
   }
+
+  if (needUnixDomainSocket) {
+    struct sockaddr_un unix_addr;
+    bzero(&unix_addr, sizeof(unix_addr));
+    unix_addr.sun_family = AF_UNIX;
+    const char* socket_name_ = "/tmp/rohitsd/1.sock";
+    strncpy(unix_addr.sun_path, socket_name_, sizeof(unix_addr.sun_path) - 1);
+    server_fd_ = socket(PF_UNIX, SOCK_STREAM, 0);
+    if (!server_fd_) {
+      perror("socket");
+      exit(-1);
+    }
+
+    if (bind(server_fd_, (const struct sockaddr *)&unix_addr, sizeof(unix_addr)) < 0) {
+      perror("socket");
+      exit(-1);
+    }
+
+    if (eventLoop_->registerForRead(server_fd_, on_new_connection_callback_2, true) < 0) {
+      LOG(ERROR) << "register for read of the socket failed in server\n";
+      close(server_fd_);
+      return -1;
+    }
+}
 
   return 0;
 }
@@ -181,6 +208,63 @@ void BaseServer::OnNewConnection(EventLoop::Status _status) {
     return;
   }
 }
+
+void BaseServer::OnNewConnection2(EventLoop::Status _status) {
+  LOG(INFO) <<"Called OnNewConnection2";
+  if (_status == EventLoop::READ_EVENT) {
+    // The EventLoop indicated that the socket is writable.
+    // Which means that a new client has connected to it.
+    auto endPoint = new ConnectionEndPoint(options_.get_sin_family() != AF_INET);
+    struct sockaddr* serv_addr = endPoint->addr();
+    socklen_t addrlen = endPoint->addrlen();
+    sp_int32 fd = accept(server_fd_, serv_addr, &addrlen);
+    endPoint->set_fd(fd);
+    if (endPoint->get_fd() > 0) {
+      // accept succeeded.
+
+      // Set defaults
+      if (SockUtils::setSocketDefaults(endPoint->get_fd()) < 0) {
+        close(endPoint->get_fd());
+        delete endPoint;
+        return;
+      }
+
+      // Create the connection object and register our callbacks on various events.
+      BaseConnection* conn = CreateConnection(endPoint, &connection_options_, eventLoop_);
+      auto ccb = [conn, this](NetworkErrorCode ec) { this->OnConnectionClose(conn, ec); };
+      conn->registerForClose(std::move(ccb));
+
+      if (conn->start() != 0) {
+        // Connection didn't start properly. Cleanup.
+        // We assume here that this particular connection went bad, so we simply return.
+        LOG(ERROR) << "Could not start the connection for read write";
+        close(endPoint->get_fd());
+        delete conn;
+        return;
+      }
+      active_connections_.insert(conn);
+      HandleNewConnection_Base(conn);
+      return;
+    } else {
+      // accept failed.
+      if (errno == EAGAIN) {
+        // This is really odd. We thought that we had a read event
+        LOG(ERROR) << "accept failed with EAGAIN when it should have worked. Ignoring";
+      } else {
+        LOG(ERROR) << "accept failed with errno " << errno;
+      }
+      close(endPoint->get_fd());
+      delete endPoint;
+      return;
+    }
+  } else {
+    // What the hell, we only registered ourselves to reading
+    // Just print a warning message
+    LOG(WARNING) << "WARNING while expecting a read event we got " << _status;
+    return;
+  }
+}
+
 
 void BaseServer::OnConnectionClose(BaseConnection* _connection, NetworkErrorCode _status) {
   if (active_connections_.find(_connection) == active_connections_.end()) {

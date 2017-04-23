@@ -116,6 +116,8 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateQueueMetrics(status);
   }, true, SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND), 0);
+
+  needUnixDomainSocket = true;
 }
 
 StMgrServer::~StMgrServer() {
@@ -313,7 +315,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
   // Do some basic checks
   bool error = false;
   if (_request->topology_name() != topology_name_ || _request->topology_id() != topology_id_) {
-    LOG(ERROR) << "Invalid topology name/id in register instance request"
+    LOG(ERROR) << "Invalid topoloGy name/id in register instance request"
                << " Found " << _request->topology_name() << " and " << _request->topology_id();
     error = true;
   }
@@ -364,7 +366,63 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
         connection_buffer_metric_map_[instance_id] = queue_metric;
       }
     }
-    instance_info_[task_id]->set_connection(_conn);
+
+    LOG(INFO) << "rohitsd_log: Registered Heron Instance" << instance_id;
+    sp_string bolt_name("ppexclaim");
+    // if (instance_id.find(bolt_name) != sp_string::npos) {
+    if (false) {
+      LOG(INFO) << "rohitsd_log: Caught bolt: "<< instance_id;
+      const char* socket_name_ = "/tmp/rohitsd/1.sock";
+      // struct sockaddr_un server_addr;
+      auto endPoint = new ConnectionEndPoint(true);
+      struct sockaddr_un* server_addr = reinterpret_cast<struct sockaddr_un*>(endPoint->addr());
+      socklen_t addrlen = endPoint->addrlen();
+      // setup socket address structure
+      bzero(server_addr, addrlen);
+      server_addr->sun_family = AF_UNIX;
+      strncpy(server_addr->sun_path, socket_name_, sizeof(server_addr->sun_path) - 1);
+      LOG(INFO) << "rohitsd_log: Creating unix domain socket";
+
+      // create socket
+      int server_ = socket(PF_UNIX, SOCK_STREAM, 0);
+      if (!server_) {
+        perror("socket");
+        exit(-1);
+      }
+
+      LOG(INFO) << "rohitsd_log: Connecting unix domain socket";
+      // connect to server
+      if (connect(server_, (const struct sockaddr *)server_addr, endPoint->addrlen()) < 0) {
+        // perror("connect");
+        LOG(ERROR) << "rohitsd_log: Failed to connect to unix ds.";
+        // exit(-1);
+      }
+
+      endPoint->set_fd(server_);
+
+      LOG(INFO) << "rohitsd_log: Sending dummy data to unix domain socket";
+
+      char numstr[21];
+      snprintf(numstr, 21*sizeof(char), "%d", 2048);
+
+      if (send(server_, numstr, 21*sizeof(char), 0) < 0) {
+         printf("Size sending failed\n");
+      }
+
+      LOG(INFO) << "rohitsd_log: Creating new connection for unix domain socket";
+
+      Connection* uds_conn = new Connection(endPoint, _conn->mOptions, _conn->mEventLoop);
+      // auto ccb = [uds_conn, this](NetworkErrorCode ec)
+      // { _conn->OnConnectionClose(uds_conn, ec); };
+      // uds_conn->registerForClose(std::move(ccb));
+
+      // instance_uds_info_[task_id] = server_;
+      instance_info_[task_id]->set_connection(uds_conn);
+      active_instances_[uds_conn] = task_id;
+    } else {
+      LOG(INFO) <<"rohitsd_log: In else part";
+      instance_info_[task_id]->set_connection(_conn);
+    }
 
     proto::stmgr::RegisterInstanceResponse response;
     response.mutable_status()->set_status(proto::system::OK);
