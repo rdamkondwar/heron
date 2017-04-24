@@ -46,6 +46,7 @@ sp_int32 BaseConnection::start() {
     LOG(ERROR) << "Could not register for read of the socket during start\n";
     return -1;
   }
+  LOG(INFO) << "rohitsd_log: Setting mState to CONNECTED";
   mState = CONNECTED;
   return 0;
 }
@@ -103,6 +104,7 @@ void BaseConnection::internalClose() {
 }
 
 sp_int32 BaseConnection::registerForWrite() {
+  LOG(INFO) << "Connection - "<< mState;
   if (mState != CONNECTED) {
     LOG(ERROR) << "Connection is not connected, hence cannot send\n";
     return -1;

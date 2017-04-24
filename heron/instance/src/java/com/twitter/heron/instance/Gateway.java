@@ -53,6 +53,7 @@ public class Gateway implements Runnable, AutoCloseable {
   private final StreamManagerClient streamManagerClient;
 
   private final NIOLooper gatewayLooper;
+  private final NIOLooper metricsGatewayLooper;
 
   private final MetricsCollector gatewayMetricsCollector;
 
@@ -71,11 +72,27 @@ public class Gateway implements Runnable, AutoCloseable {
                  final Communicator<InstanceControlMsg> inControlQueue,
                  final List<Communicator<Metrics.MetricPublisherPublishMessage>> outMetricsQueues)
       throws IOException {
+      this(topologyName, topologyId, instance, streamPort, metricsPort, gatewayLooper,
+           inStreamQueue, outStreamQueue, inControlQueue, outMetricsQueues, gatewayLooper);
+  }
+
+  /**
+   * Construct a Gateway basing on given arguments
+   */
+  public Gateway(String topologyName, String topologyId, PhysicalPlans.Instance instance,
+                 int streamPort, int metricsPort, final NIOLooper gatewayLooper,
+                 final Communicator<HeronTuples.HeronTupleSet> inStreamQueue,
+                 final Communicator<HeronTuples.HeronTupleSet> outStreamQueue,
+                 final Communicator<InstanceControlMsg> inControlQueue,
+                 final List<Communicator<Metrics.MetricPublisherPublishMessage>> outMetricsQueues,
+                 final NIOLooper metricsGatewayLooper)
+      throws IOException {
     systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     // New the client
     this.gatewayLooper = gatewayLooper;
+    this.metricsGatewayLooper = metricsGatewayLooper;
     this.gatewayMetricsCollector = new MetricsCollector(gatewayLooper, outMetricsQueues.get(0));
 
     // JVM Metrics are auto-sample metrics so we do not have to insert it inside singleton
@@ -107,7 +124,7 @@ public class Gateway implements Runnable, AutoCloseable {
             topologyName, topologyId, instance,
             inStreamQueue, outStreamQueue, inControlQueue,
             socketOptions, gatewayMetrics);
-    this.metricsManagerClient = new MetricsManagerClient(gatewayLooper, METRICS_MGR_HOST,
+    this.metricsManagerClient = new MetricsManagerClient(metricsGatewayLooper, METRICS_MGR_HOST,
         metricsPort, instance, outMetricsQueues, socketOptions, gatewayMetrics);
 
     // Attach sample Runnable to gatewayMetricsCollector
@@ -141,7 +158,7 @@ public class Gateway implements Runnable, AutoCloseable {
         gatewayLooper.registerTimerEventInNanoSeconds(instanceTuningIntervalMs, this);
       }
     };
-    gatewayLooper.registerTimerEventInSeconds(
+    metricsGatewayLooper.registerTimerEventInSeconds(
         systemConfig.getInstanceMetricsSystemSampleIntervalSec(),
         tuningStreamQueueSize);
   }

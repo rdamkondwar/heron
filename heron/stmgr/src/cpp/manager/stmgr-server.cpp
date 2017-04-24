@@ -424,6 +424,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
       instance_info_[task_id]->set_connection(_conn);
     }
 
+    LOG(INFO) << "rohitsd_log: Sending resp for regInstance req for " << instance_id;
     proto::stmgr::RegisterInstanceResponse response;
     response.mutable_status()->set_status(proto::system::OK);
     const proto::system::PhysicalPlan* pplan = stmgr_->GetPhysicalPlan();
@@ -431,7 +432,7 @@ void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
       response.mutable_pplan()->CopyFrom(*pplan);
     }
     SendResponse(_reqid, _conn, response);
-
+    LOG(INFO) << "rohitsd_log: Sent resp for regInstance req for " << instance_id;
     // Have all the instances connected to us?
     if (HaveAllInstancesConnectedToUs()) {
       // Now we can connect to the tmaster

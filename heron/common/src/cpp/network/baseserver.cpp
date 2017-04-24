@@ -134,7 +134,7 @@ sp_int32 BaseServer::Start_Base() {
     if (eventLoop_->registerForRead(server_fd_, on_new_connection_callback_2, true) < 0) {
       LOG(ERROR) << "register for read of the socket failed in server\n";
       close(server_fd_);
-      // return -1;
+      return -1;
     }
 }
 
@@ -146,6 +146,8 @@ sp_int32 BaseServer::Stop_Base() {
   CHECK_EQ(eventLoop_->unRegisterForRead(listen_fd_), 0);
   // Close the listen socket.
   close(listen_fd_);
+  const char* socket_name_ = "/tmp/rohitsd/1.sock";
+  unlink(socket_name_);
 
   // Close all active connections and delete them
   while (active_connections_.size() > 0) {
@@ -226,6 +228,10 @@ void BaseServer::OnNewConnection2(EventLoop::Status _status) {
     endPoint->set_fd(fd);
     if (endPoint->get_fd() > 0) {
       // accept succeeded.
+      if (SockUtils::setKeepAlive(server_fd_) < 0) {
+        LOG(ERROR) << "setsockopt for keepalive failed in server";
+        return;
+      }
 
       // Set defaults
       // if (SockUtils::setSocketDefaults(endPoint->get_fd()) < 0) {

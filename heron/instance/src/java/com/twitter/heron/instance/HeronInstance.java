@@ -49,6 +49,7 @@ public class HeronInstance {
   private static final int NUM_THREADS = 2;
 
   private final NIOLooper gatewayLooper;
+  private final NIOLooper metricsGatewayLooper;
   private final SlaveLooper slaveLooper;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
@@ -86,6 +87,7 @@ public class HeronInstance {
 
     // Two WakeableLooper
     gatewayLooper = new NIOLooper(true);
+    metricsGatewayLooper = new NIOLooper();
     slaveLooper = new SlaveLooper();
 
     // Add the task on exit
@@ -102,13 +104,14 @@ public class HeronInstance {
     outMetricsQueues = new ArrayList<Communicator<Metrics.MetricPublisherPublishMessage>>(2);
 
     Communicator<Metrics.MetricPublisherPublishMessage> gatewayMetricsOut =
-        new Communicator<Metrics.MetricPublisherPublishMessage>(gatewayLooper, gatewayLooper);
+        new Communicator<Metrics.MetricPublisherPublishMessage>(metricsGatewayLooper,
+        metricsGatewayLooper);
     gatewayMetricsOut.init(systemConfig.getInstanceInternalMetricsWriteQueueCapacity(),
         systemConfig.getInstanceTuningExpectedMetricsWriteQueueSize(),
         systemConfig.getInstanceTuningCurrentSampleWeight());
 
     Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut =
-        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, gatewayLooper);
+        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, metricsGatewayLooper);
     slaveMetricsOut.init(systemConfig.getInstanceInternalMetricsWriteQueueCapacity(),
         systemConfig.getInstanceTuningExpectedMetricsWriteQueueSize(),
         systemConfig.getInstanceTuningCurrentSampleWeight());
@@ -119,7 +122,8 @@ public class HeronInstance {
     // We will new these two Runnable
     this.gateway =
         new Gateway(topologyName, topologyId, instance, streamPort, metricsPort,
-            gatewayLooper, inStreamQueue, outStreamQueue, inControlQueue, outMetricsQueues);
+                    gatewayLooper, inStreamQueue, outStreamQueue, inControlQueue, outMetricsQueues,
+                    metricsGatewayLooper);
     this.slave = new Slave(slaveLooper, inStreamQueue, outStreamQueue,
         inControlQueue, slaveMetricsOut);
 
