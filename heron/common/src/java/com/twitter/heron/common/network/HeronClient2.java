@@ -152,18 +152,27 @@ public abstract class HeronClient2 implements ISelectHandler {
         java.io.File path = new java.io.File("/tmp/rohitsd/1.sock");
         udsEndPoint = new UnixSocketAddress(path);
         socketChannel = UnixSocketChannel.open(udsEndPoint);
+        socketChannel.configureBlocking(false);
         LOG.info("rohitsd_log: Opened UnixSocketChannel...");
       }
 
       // If the socketChannel has already connect to endpoint, call handleConnect()
       // Otherwise, registerConnect(), which will call handleConnect() when it is connectible
-      // LOG.info("Connecting to endpoint: " + udsEndPoint);
+      LOG.info("Connecting to endpoint: " + udsEndPoint);
+      if (socketChannel.isConnected()) {
+        LOG.info("Connected to endpoint: " + udsEndPoint);
+      } else {
+        LOG.info("Not Connected to endpoint: " + udsEndPoint);
+      }
+
+      handleConnect(socketChannel);
+
       // if (socketChannel.connect(udsEndPoint)) {
       //   handleConnect(socketChannel);
       // } else {
       //   nioLooper.registerConnect(socketChannel, this);
       // }
-      handleConnect(socketChannel);
+      // handleConnect(socketChannel);
       // Selector sel = NativeSelectorProvider.getInstance().openSelector();
       // UnixServerSocketChannel udsSocketChannel = UnixServerSocketChannel.open();
       // udsSocketChannel.configureBlocking(false);
@@ -175,7 +184,7 @@ public abstract class HeronClient2 implements ISelectHandler {
 
     } catch (IOException e) {
       // Call onConnect() with CONNECT_ERROR
-      LOG.log(Level.SEVERE, "Error connecting to remote endpoint: " + endpoint, e);
+      LOG.log(Level.SEVERE, "Error connecting to remote endpoint: " + udsEndPoint, e);
       Runnable r = new Runnable() {
         public void run() {
           onConnect(StatusCode.CONNECT_ERROR);
@@ -291,21 +300,25 @@ public abstract class HeronClient2 implements ISelectHandler {
 
   @Override
   public void handleConnect(SelectableChannel channel) {
-    try {
-      if (socketChannel.finishConnect()) {
-        // If we finishConnect(), we have to unregisterConnect, otherwise there will be a bug
-        // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4960791
-        nioLooper.unregisterConnect(channel);
-      }
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to FinishConnect to endpoint: " + endpoint, e);
-      Runnable r = new Runnable() {
-        public void run() {
-          onConnect(StatusCode.CONNECT_ERROR);
+    LOG.info("rohitsd_log: " + socketChannel.isConnected());
+
+    if (false) {
+      try {
+        if (socketChannel.finishConnect()) {
+          // If we finishConnect(), we have to unregisterConnect, otherwise there will be a bug
+          // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4960791
+          nioLooper.unregisterConnect(channel);
         }
-      };
-      nioLooper.registerTimerEventInSeconds(0, r);
-      return;
+      } catch (IOException e) {
+        LOG.log(Level.SEVERE, "Failed to FinishConnect to endpoint: " + endpoint, e);
+        Runnable r = new Runnable() {
+              public void run() {
+                onConnect(StatusCode.CONNECT_ERROR);
+              }
+          };
+        nioLooper.registerTimerEventInSeconds(0, r);
+        return;
+      }
     }
 
     // Construct the ChannelHelper and by default it would:

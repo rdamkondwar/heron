@@ -22,6 +22,8 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.Set;
 
+import jnr.enxio.channels.NativeSelectorProvider;
+
 /**
  * A NIOLooper, implementing WakeableLooper, is a class wrapping a Java NIO selector to dispatch events.
  * It extends WakeableLooper, so it will execute in a while loop unless the exitLoop() is called.
@@ -34,7 +36,11 @@ public class NIOLooper extends WakeableLooper {
 
   public NIOLooper() throws IOException {
     selector = Selector.open();
+    addNIOLooperTasks();
+  }
 
+  public NIOLooper(boolean isUnixSelector) throws IOException {
+    this.selector = NativeSelectorProvider.getInstance().openSelector();
     addNIOLooperTasks();
   }
 

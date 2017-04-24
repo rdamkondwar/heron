@@ -24,6 +24,8 @@ java_library(
     srcs = glob(["**/basics/*.java"]),
     deps = [
         "@com_google_guava_guava//jar",
+        "//third_party/java:unixdomainsocket",
+        "//third_party/uds:jffi-native",
     ]
 )
 

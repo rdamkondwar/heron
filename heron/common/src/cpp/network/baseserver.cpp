@@ -228,11 +228,11 @@ void BaseServer::OnNewConnection2(EventLoop::Status _status) {
       // accept succeeded.
 
       // Set defaults
-      if (SockUtils::setSocketDefaults(endPoint->get_fd()) < 0) {
-        close(endPoint->get_fd());
-        delete endPoint;
-        return;
-      }
+      // if (SockUtils::setSocketDefaults(endPoint->get_fd()) < 0) {
+      //   close(endPoint->get_fd());
+      //   delete endPoint;
+      //   return;
+      // }
 
       // Create the connection object and register our callbacks on various events.
       BaseConnection* conn = CreateConnection(endPoint, &connection_options_, eventLoop_);

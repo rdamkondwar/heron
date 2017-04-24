@@ -85,7 +85,7 @@ public class HeronInstance {
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Two WakeableLooper
-    gatewayLooper = new NIOLooper();
+    gatewayLooper = new NIOLooper(true);
     slaveLooper = new SlaveLooper();
 
     // Add the task on exit
