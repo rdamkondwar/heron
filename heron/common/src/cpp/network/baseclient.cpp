@@ -55,9 +55,14 @@ void BaseClient::Start_Base() {
   }
 
   // set default socket options
-  if (SockUtils::setSocketDefaults(fd) < 0) {
-    close(fd);
-    HandleConnect_Base(CONNECT_ERROR);
+  // if (SockUtils::setSocketDefaults(fd) < 0) {
+  //   close(fd);
+  //   HandleConnect_Base(CONNECT_ERROR);
+  //   return;
+  // }
+
+  if (SockUtils::setNonBlocking(fd) < 0) {
+    LOG(ERROR) << "setsockopt for non-blocking failed in client";
     return;
   }
 

@@ -145,12 +145,15 @@ void BaseConnection::handleWrite(EventLoop::Status status) {
 }
 
 void BaseConnection::handleRead(EventLoop::Status status) {
+  LOG(INFO) << "handleRead for conn: " << mEndpoint->get_fd();
   CHECK(status == EventLoop::READ_EVENT);
   mReadState = READY;
   sp_int32 readStatus = readFromEndPoint(mEndpoint->get_fd());
   if (readStatus >= 0) {
     mReadState = NOTREADY;
   } else {
+    LOG(INFO) << "handleRead got ret from readFEP: " << readStatus;
+    // return;
     mReadState = ERROR;
     mState = TO_BE_DISCONNECTED;
   }

@@ -1,21 +1,35 @@
-//#include "core/network/misc/echoclient.h"
-#include "echoclient.h"
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// #include "core/network/misc/echoclient.h"
+#include "network/echoclient.h"
 #include <stdio.h>
 #include <iostream>
+#include <string>
 
 EchoClient::EchoClient(EventLoopImpl* eventLoop, const NetworkOptions& _options,
                        bool _perf)
-  : Client(eventLoop, _options), nrequests_(0), perf_(_perf)
-{
+  : Client(eventLoop, _options), nrequests_(0), perf_(_perf) {
   InstallResponseHandler(new EchoServerRequest(), &EchoClient::HandleEchoResponse);
 }
 
-EchoClient::~EchoClient()
-{
+EchoClient::~EchoClient() {
 }
 
-void EchoClient::CreateAndSendRequest()
-{
+void EchoClient::CreateAndSendRequest() {
   char buf[1024];
   if (!perf_) {
     char* line = fgets(buf, 1024, stdin);
@@ -28,7 +42,7 @@ void EchoClient::CreateAndSendRequest()
       line[strlen(line) - 1] = '\0';
     }
   } else {
-    strcpy(buf, "I love you");
+    snprintf(buf, sizeof("I love you"), "I love you");
   }
   std::string tosend(buf);
   EchoServerRequest* request = new EchoServerRequest();
@@ -38,8 +52,7 @@ void EchoClient::CreateAndSendRequest()
   return;
 }
 
-void EchoClient::HandleConnect(NetworkErrorCode _status)
-{
+void EchoClient::HandleConnect(NetworkErrorCode _status) {
   if (_status == OK) {
     std::cout << "Connected to " << get_clientoptions().get_host()
          << ":" << get_clientoptions().get_port() << std::endl;
@@ -57,15 +70,13 @@ void EchoClient::HandleConnect(NetworkErrorCode _status)
   }
 }
 
-void EchoClient::HandleClose(NetworkErrorCode)
-{
+void EchoClient::HandleClose(NetworkErrorCode) {
   std::cout << "Server connection closed\n";
   getEventLoop()->loopExit();
 }
 
 void EchoClient::HandleEchoResponse(void*, EchoServerResponse* _response,
-                                    NetworkErrorCode _status)
-{
+                                    NetworkErrorCode _status) {
   if (_status != OK) {
     std::cout << "HandleEchoResponse got an error " << _status << "\n";
   } else {

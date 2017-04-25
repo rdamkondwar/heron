@@ -56,17 +56,22 @@ sp_int32 BaseServer::Start_Base() {
     return -1;
   }
 
-  if (SockUtils::setSocketDefaults(listen_fd_) < 0) {
-    close(listen_fd_);
+  if (SockUtils::setNonBlocking(listen_fd_) < 0) {
+    LOG(ERROR) << "setsockopt for non-blocking failed in server";
     return -1;
   }
 
+  // if (SockUtils::setSocketDefaults(listen_fd_) < 0) {
+  //   close(listen_fd_);
+  //   return -1;
+  // }
+
   // Set the socket option for addr reuse
-  if (SockUtils::setReuseAddress(listen_fd_) < 0) {
-    LOG(ERROR) << "setsockopt of a socket failed in server " << errno << "\n";
-    close(listen_fd_);
-    return -1;
-  }
+  // if (SockUtils::setReuseAddress(listen_fd_) < 0) {
+  //   LOG(ERROR) << "setsockopt of a socket failed in server " << errno << "\n";
+  //   close(listen_fd_);
+  //   return -1;
+  // }
 
   // Set the address
   struct sockaddr_in in_addr;
@@ -120,6 +125,11 @@ sp_int32 BaseServer::Start_Base() {
       LOG(ERROR) << "Failed to create server uds socket.";
     }
 
+    // if (SockUtils::setSocketDefaults(server_fd_) < 0) {
+    //   close(server_fd_);
+    //   return -1;
+    // }
+
     if (bind(server_fd_, (const struct sockaddr *)&unix_addr, sizeof(unix_addr)) < 0) {
       LOG(ERROR) << "Failed to bind server uds socket.";
     }
@@ -162,6 +172,7 @@ sp_int32 BaseServer::Stop_Base() {
 }
 
 void BaseServer::OnNewConnection(EventLoop::Status _status) {
+  LOG(INFO) <<"Called OnNewConnection";
   if (_status == EventLoop::READ_EVENT) {
     // The EventLoop indicated that the socket is writable.
     // Which means that a new client has connected to it.
@@ -174,9 +185,14 @@ void BaseServer::OnNewConnection(EventLoop::Status _status) {
       // accept succeeded.
 
       // Set defaults
-      if (SockUtils::setSocketDefaults(endPoint->get_fd()) < 0) {
-        close(endPoint->get_fd());
-        delete endPoint;
+      // if (SockUtils::setSocketDefaults(endPoint->get_fd()) < 0) {
+      //   close(endPoint->get_fd());
+      //   delete endPoint;
+      //   return;
+      // }
+
+      if (SockUtils::setNonBlocking(fd) < 0) {
+        LOG(ERROR) << "setsockopt for non-blocking failed in server";
         return;
       }
 
@@ -228,8 +244,8 @@ void BaseServer::OnNewConnection2(EventLoop::Status _status) {
     endPoint->set_fd(fd);
     if (endPoint->get_fd() > 0) {
       // accept succeeded.
-      if (SockUtils::setKeepAlive(server_fd_) < 0) {
-        LOG(ERROR) << "setsockopt for keepalive failed in server";
+      if (SockUtils::setNonBlocking(server_fd_) < 0) {
+        LOG(ERROR) << "setsockopt for non-blocking failed in server";
         return;
       }
 

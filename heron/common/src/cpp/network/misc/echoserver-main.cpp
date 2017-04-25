@@ -1,12 +1,11 @@
 #include <iostream>
 
-#include "core/common/public/common.h"
-#include "core/errors/public/errors.h"
-#include "core/threads/public/threads.h"
-#include "core/network/public/network.h"
-
-#include "core/network/misc/tests.pb.h"
-#include "core/network/misc/echoserver.h"
+#include "common/public/common.h"
+#include "errors/public/errors.h"
+#include "threads/public/threads.h"
+#include "network/public/network.h"
+#include "network/misc/tests.pb.h"
+#include "network/misc/echoserver.h"
 
 int main(int argc, char* argv[])
 {

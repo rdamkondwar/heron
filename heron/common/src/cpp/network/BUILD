@@ -54,3 +54,56 @@ cc_library(
     ],
     linkstatic = 1,
 )
+
+proto_library(
+  name = "proto_tests",
+  src = "tests.proto",
+  includes = ["heron/common/src/cpp/network"],
+  gen_cc = 1,
+  gen_java = 1,
+  gen_py = 1,
+)
+
+cc_binary(
+    name = "echo-client",
+    srcs = [
+        "echoclient.cpp",
+        "echoclient-main.cpp",
+        "echoclient.h"
+    ],
+    copts = [
+        "-Iheron/common/src/cpp",
+        "-I$(GENDIR)/heron/common/src/cpp",
+    ],
+    deps = [
+        "//third_party/libevent:libevent-cxx",
+        "//heron/common/src/cpp/threads:threads-cxx",
+        "//heron/common/src/cpp/errors:errors-cxx",
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "//heron/common/src/cpp/network:network-cxx",
+        "//heron/common/src/cpp/network:proto_tests_cc",
+    ],
+    linkstatic = 1,
+)
+
+cc_binary(
+    name = "echo-server",
+    srcs = [
+        "echoserver.cpp",
+        "echoserver-main.cpp",
+        "echoserver.h"
+    ],
+    copts = [
+        "-Iheron/common/src/cpp",
+        "-I$(GENDIR)/heron/common/src/cpp",
+    ],
+    deps = [
+        "//third_party/libevent:libevent-cxx",
+        "//heron/common/src/cpp/threads:threads-cxx",
+        "//heron/common/src/cpp/errors:errors-cxx",
+        "//heron/common/src/cpp/basics:basics-cxx",
+        "//heron/common/src/cpp/network:network-cxx",
+        "//heron/common/src/cpp/network:proto_tests_cc",
+    ],
+    linkstatic = 1,
+)
