@@ -56,7 +56,12 @@ sp_int32 BaseServer::Start_Base() {
     return -1;
   }
 
-  if (SockUtils::setNonBlocking(listen_fd_) < 0) {
+  // if (SockUtils::setNonBlocking(listen_fd_) < 0) {
+  //   LOG(ERROR) << "setsockopt for non-blocking failed in server";
+  //   return -1;
+  // }
+
+  if (SockUtils::setUDSSocketDefaults(listen_fd_) < 0) {
     LOG(ERROR) << "setsockopt for non-blocking failed in server";
     return -1;
   }
@@ -192,7 +197,12 @@ void BaseServer::OnNewConnection(EventLoop::Status _status) {
       //   return;
       // }
 
-      if (SockUtils::setNonBlocking(fd) < 0) {
+      // if (SockUtils::setNonBlocking(fd) < 0) {
+      //   LOG(ERROR) << "setsockopt for non-blocking failed in server";
+      //   return;
+      // }
+
+      if (SockUtils::setUDSSocketDefaults(fd) < 0) {
         LOG(ERROR) << "setsockopt for non-blocking failed in server";
         return;
       }

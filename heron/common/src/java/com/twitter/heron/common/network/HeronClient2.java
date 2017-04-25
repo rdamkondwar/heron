@@ -153,6 +153,11 @@ public abstract class HeronClient2 implements ISelectHandler {
         udsEndPoint = new UnixSocketAddress(path);
         socketChannel = UnixSocketChannel.open(udsEndPoint);
         socketChannel.configureBlocking(false);
+        // Set the maximum possible send and receive buffers
+        socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
+        socketChannel.socket().setReceiveBufferSize(
+                socketOptions.getSocketReceivedBufferSizeInBytes());
+        socketChannel.socket().setTcpNoDelay(true);
         LOG.info("rohitsd_log: Opened UnixSocketChannel...");
       }
 

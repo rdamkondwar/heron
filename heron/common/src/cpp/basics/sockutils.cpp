@@ -178,3 +178,45 @@ sp_int32 SockUtils::setSocketDefaults(sp_int32 fd) {
 
   return SP_OK;
 }
+
+sp_int32 SockUtils::setUDSSocketDefaults(sp_int32 fd) {
+  // set the max send buffer size so that it makes the pipe fatter
+  sp_int32 send_buff;
+
+  // get the send buffer size
+  auto res = SockUtils::getSendBufferSize(fd, send_buff);
+  if (res == SP_NOTOK) {
+    PLOG(ERROR) << "Could not get the max SO_SNDBUF size";
+  } else {
+    // Set to a dummy high value. Linux will fall back to max. OSX will throw an error.
+    send_buff *= 100;
+    res = SockUtils::setSendBufferSize(fd, send_buff);
+    if (res == SP_NOTOK) {
+      PLOG(ERROR) << "Could not set SO_SNDBUF to max " << send_buff;
+    }
+  }
+
+  // set the max recv buffer size so that it makes the pipe fatter
+
+  // get the recv buffer size
+  sp_int32 recv_buff;
+  res = SockUtils::getRecvBufferSize(fd, recv_buff);
+  if (res == SP_NOTOK) {
+    PLOG(ERROR) << "Could not get the max SO_RCVBUF size";
+  } else {
+    // Set to a dummy high value. Linux will fall back to max. OSX will throw an error.
+    recv_buff *= 100;
+    res = SockUtils::setRecvBufferSize(fd, recv_buff);
+    if (res == SP_NOTOK) {
+      PLOG(ERROR) << "Could not set SO_RCVBUF to max " << recv_buff;
+    }
+  }
+
+  // make it non blocking
+  if (SockUtils::setNonBlocking(fd) < 0) {
+    PLOG(ERROR) << "unable to make socket non blocking";
+    return SP_NOTOK;
+  }
+
+  return SP_OK;
+}

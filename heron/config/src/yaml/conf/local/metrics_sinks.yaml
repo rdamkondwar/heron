@@ -5,6 +5,7 @@ sinks:
   - file-sink
   - tmaster-sink
   - metricscache-sink
+  - graphite-sink
 
 ########### Now we would specify the detailed configuration for every unique sink
 ########### Syntax: sink-id: - option(s)
@@ -104,10 +105,10 @@ metricscache-sink:
 
 ### Config for graphite-sink
 ### Currently the graphite-sink is disabled
-# graphite-sink:
-#   class: "com.twitter.heron.metricsmgr.sink.GraphiteSink"
-#   flush-frequency-ms: 60000
-#   graphite_host: "127.0.0.1" # The host of graphite to be exported metrics to
-#   graphite_port: 2004 # The port of graphite to be exported metrics to
-#   metrics_prefix: "heron" # The prefix of every metrics
-#   server_max_reconnect-attempts: 20 # The max reconnect attempts when failing to connect to graphite server
+graphite-sink:
+   class: "com.twitter.heron.metricsmgr.sink.GraphiteSink"
+   flush-frequency-ms: 5000
+   graphite_host: "ctl" # The host of graphite to be exported metrics to
+   graphite_port: 2003 # The port of graphite to be exported metrics to
+   metrics_prefix: "heron" # The prefix of every metrics
+   server_max_reconnect-attempts: 20 # The max reconnect attempts when failing to connect to graphite server

@@ -55,6 +55,9 @@ class SockUtils {
 
   //! Set reasonable default values for a socket
   static sp_int32 setSocketDefaults(sp_int32 fd);
+
+  //! Set reasonable default values for a UDS socket
+  static sp_int32 setUDSSocketDefaults(sp_int32 fd);
 };
 
 #endif
