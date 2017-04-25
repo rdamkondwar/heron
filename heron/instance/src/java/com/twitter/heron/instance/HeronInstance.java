@@ -90,8 +90,15 @@ public class HeronInstance {
     metricsGatewayLooper = new NIOLooper();
     slaveLooper = new SlaveLooper();
 
+    if (gatewayLooper == metricsGatewayLooper) {
+      LOG.info("rohitsd_log: Loopers are equal.");
+    } else {
+      LOG.info("rohitsd_log: Loopers are not equal.");
+    }
+
     // Add the task on exit
     gatewayLooper.addTasksOnExit(new GatewayExitTask());
+    metricsGatewayLooper.addTasksOnExit(new GatewayExitTask());
     slaveLooper.addTasksOnExit(new SlaveExitTask());
 
     // For stream
@@ -104,7 +111,7 @@ public class HeronInstance {
     outMetricsQueues = new ArrayList<Communicator<Metrics.MetricPublisherPublishMessage>>(2);
 
     Communicator<Metrics.MetricPublisherPublishMessage> gatewayMetricsOut =
-        new Communicator<Metrics.MetricPublisherPublishMessage>(metricsGatewayLooper,
+        new Communicator<Metrics.MetricPublisherPublishMessage>(gatewayLooper,
         metricsGatewayLooper);
     gatewayMetricsOut.init(systemConfig.getInstanceInternalMetricsWriteQueueCapacity(),
         systemConfig.getInstanceTuningExpectedMetricsWriteQueueSize(),
@@ -255,6 +262,9 @@ public class HeronInstance {
 
         // And exit the GatewayLooper
         gatewayLooper.exitLoop();
+        if (metricsGatewayLooper != gatewayLooper) {
+          metricsGatewayLooper.exitLoop();
+        }
       } else {
         // If the exceptions happen in other threads
         // We would just invoke GatewayExitTask

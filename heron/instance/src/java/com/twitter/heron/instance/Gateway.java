@@ -93,7 +93,8 @@ public class Gateway implements Runnable, AutoCloseable {
     // New the client
     this.gatewayLooper = gatewayLooper;
     this.metricsGatewayLooper = metricsGatewayLooper;
-    this.gatewayMetricsCollector = new MetricsCollector(gatewayLooper, outMetricsQueues.get(0));
+    this.gatewayMetricsCollector = new MetricsCollector(metricsGatewayLooper,
+                                                        outMetricsQueues.get(0));
 
     // JVM Metrics are auto-sample metrics so we do not have to insert it inside singleton
     // since it should not be used in other places
@@ -169,7 +170,20 @@ public class Gateway implements Runnable, AutoCloseable {
 
     streamManagerClient.start();
     metricsManagerClient.start();
+    Runnable metricsLooperThread = new Runnable() {
+      @Override
+      public void run() {
+        LOG.info("rohitsd_log: Inside Starting metrics gateway looper");
+        metricsGatewayLooper.loop();
+      }
+    };
 
+    if (gatewayLooper != metricsGatewayLooper) {
+      LOG.info("rohitsd_log: Starting metrics gateway looper");
+      new Thread(metricsLooperThread).start();
+      LOG.info("rohitsd_log: Started metrics gateway looper");
+    }
+    LOG.info("rohitsd_log: Starting gateway looper");
     gatewayLooper.loop();
   }
 
