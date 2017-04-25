@@ -117,7 +117,7 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
     this->UpdateQueueMetrics(status);
   }, true, SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND), 0);
 
-  needUnixDomainSocket = true;
+  // needUnixDomainSocket = false;
 }
 
 StMgrServer::~StMgrServer() {

@@ -237,13 +237,16 @@ public class SocketChannelHelper {
   }
 
   public void enableWriting() {
+    LOG.info("In enableWriting " + looper.isWriteRegistered(socketChannel));
     if (!looper.isWriteRegistered(socketChannel)) {
       try {
         looper.registerWrite(socketChannel, selectHandler);
       } catch (ClosedChannelException e) {
+        LOG.info("CloseChannelExecption in enableWriting");
         selectHandler.handleError(socketChannel);
       }
     }
+    LOG.info("In enableWriting end" + looper.isWriteRegistered(socketChannel));
   }
 
   public void disableWriting() {

@@ -114,7 +114,8 @@ sp_int32 BaseServer::Start_Base() {
     return -1;
   }
 
-  if (needUnixDomainSocket) {
+  if (false) {
+    LOG(INFO) << "You shouldn't be here!";
     struct sockaddr_un unix_addr;
     bzero(&unix_addr, sizeof(unix_addr));
     unix_addr.sun_family = AF_UNIX;
