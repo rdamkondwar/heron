@@ -157,7 +157,7 @@ public abstract class HeronClient2 implements ISelectHandler {
         socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
         socketChannel.socket().setReceiveBufferSize(
                 socketOptions.getSocketReceivedBufferSizeInBytes());
-        socketChannel.socket().setTcpNoDelay(true);
+        // socketChannel.socket().setTcpNoDelay(true);
         LOG.info("rohitsd_log: Opened UnixSocketChannel...");
       }
 
